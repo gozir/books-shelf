@@ -82,16 +82,45 @@ const addBookHandler = (request, h) => {
 }
 
 // tampilkan seluruh buku
-const getAllBooksHandler = () => ({
-  status: 'success',
-  data: {
-    books: books.map((book) => ({
-      id: book.id,
-      name: book.name,
-      publisher: book.publisher
-    }))
+const getAllBooksHandler = (request, h) => {
+  const {
+    name,
+    reading,
+    finished
+  } = request.query
+
+  let fBook = books
+
+  if (name) {
+    fBook = books.filter((book) => {
+      const bookName = book.name.toLowerCase()
+      return bookName.includes(name.toLowerCase())
+    })
   }
-})
+
+  if (reading === '0' || reading === '1') {
+    const isRead = reading === '1'
+    fBook = books.filter((book) => book.reading === isRead)
+  }
+
+  if (finished === '0' || finished === '1') {
+    const isFinished = finished === '1'
+    fBook = books.filter((book) => book.finished === isFinished)
+  }
+
+  const response = h.response({
+    status: 'success',
+    data: {
+      books: fBook.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher
+      }))
+    }
+  })
+  response.code(200)
+  return response
+}
 
 // tampilkan buku dengan id tertentu
 const getBookByIdHandler = (request, h) => {
